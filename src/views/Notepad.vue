@@ -3,21 +3,33 @@
     <v-btn class="add-btn" v-on:click="addNote()"><i class="fas fa-plus"></i></v-btn>
       <v-collapse-group :onlyOneActive="false" class="notes">
         <v-collapse-wrapper v-for="(item, index) in items" :key="item.id">
-          <div :class="'note color' + item.color">
-            <div class="title">
-              <medium-editor :text='item.title' custom-tag='h2' v-on:edit='processEditOperation($event, item)' />
+          <VueDragResize
+            :isActive="true"
+            :w="300" :h="20"
+            :x="item.left"
+            :y="item.top"
+            v-on:dragging="resize($event, item)"
+            :isResizable="false"
+            drag-handle=".drag-handle"
+            :disableUserSelect="false"
+          >
+            <div :class="'note color' + item.color">
+              <div class="drag-handle"></div>
+              <div class="title">
+                <medium-editor :text='item.title' custom-tag='h2' v-on:edit='processEditOperation($event, item)' />
+              </div>
+              <div v-on:click="changeColor(item)" class="color">
+                <i class="fas fa-fill-drip"></i>
+              </div>
+              <div class="toggle" v-collapse-toggle>
+                <i class="fas fa-toggle-on"></i>
+              </div>
+              <v-btn class="close-btn" v-on:click="deleteItem(index)"><i class="fas fa-times"></i></v-btn>
+              <div class="my-content" v-collapse-content>
+                <note :content="item.content"  @notecontent="onNoteUpdate($event, item, index)"></note>
+              </div>
             </div>
-            <div v-on:click="changeColor(item)" class="color">
-              <i class="fas fa-fill-drip"></i>
-            </div>
-            <div class="toggle" v-collapse-toggle>
-              <i class="fas fa-toggle-on"></i>
-            </div>
-            <v-btn class="close-btn" v-on:click="deleteItem(index)"><i class="fas fa-times"></i></v-btn>
-            <div class="my-content" v-collapse-content>
-              <note :content="item.content"  @notecontent="onNoteUpdate($event, item, index)"></note>
-            </div>
-          </div>
+          </VueDragResize>
         </v-collapse-wrapper>
       </v-collapse-group>
     </div>
@@ -30,9 +42,11 @@ import Note from '@/components/Note.vue'
 import VueCollapse from 'vue2-collapse'
 import UUID from 'vue-uuid'
 import editor from 'vue2-medium-editor'
+import VueDragResize from 'vue-drag-resize'
 
 Vue.use(VueCollapse)
 Vue.use(UUID)
+Vue.component('vue-drag-resize', VueDragResize)
 
 export default {
   components: {
@@ -40,6 +54,7 @@ export default {
     // eslint-disable-next-line
     VueCollapse,
     'medium-editor': editor,
+    VueDragResize,
   },
   methods: {
     addNote () {
@@ -48,6 +63,10 @@ export default {
         content: '<p>this is Content</p>',
         id: this.$uuid.v1(),
         color: Math.floor(Math.random() * 3) + 1,
+        width: 300,
+        height: 300,
+        top: 20,
+        left: 20,
       }
       this.items.push(blankNote)
     },
@@ -56,8 +75,15 @@ export default {
         title: item.title,
         content: noteContent,
         id: item.id,
+        color: item.color,
+        top: item.top,
+        left: item.left,
       }
       Vue.set(this.items, index, itemObject)
+    },
+    resize (newRect, item) {
+      item.top = this.top = newRect.top
+      item.left = this.left = newRect.left
     },
     deleteItem (index) {
       this.items.splice(index, 1)
@@ -94,11 +120,12 @@ export default {
 
 <style>
 
-  body {
+  body, html {
    background: url('../assets/images/board.png') no-repeat;
    background-size: cover;
    height: 100vh;
    max-height: 100vh;
+   overflow: hidden;
   }
 
   .notepad {
@@ -113,18 +140,22 @@ export default {
     display: none;
     min-height: 0;
   }
-
   .note {
-    position: relative;
-    float: left;
     width: 300px;
     padding: 0;
-
     margin: 0 30px 30px 0;
     -webkit-box-shadow: 0 3px 12px rgba(0, 0, 0, 0.50), 0 0 40px rgba(0, 0, 0, 0.12) inset;
     -moz-box-shadow: 0 3px 12px rgba(0, 0, 0, 0.50), 0 0 40px rgba(0, 0, 0, 0.12) inset;
     box-shadow: 0 3px 12px rgba(0, 0, 0, 0.50), 0 0 40px rgba(0, 0, 0, 0.12) inset;
     padding: 20px;
+  }
+
+  .drag-handle {
+    position: absolute;
+    width: 220px;
+    height: 20px;
+    top: 0;
+    left: 0;
   }
 
   .note.color1 {
@@ -221,6 +252,10 @@ export default {
   .theme--light.v-btn:not(.v-btn--icon):not(.v-btn--flat) {
     margin: 0 0 20px;
     padding: 0;
+  }
+
+  .vdr.active:before {
+    outline: none;
   }
 
 </style>
