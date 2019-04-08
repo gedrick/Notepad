@@ -2,13 +2,13 @@
   <div class="notepad">
     <v-btn class="add-btn" v-on:click="addNote()"><i class="fas fa-plus"></i></v-btn>
       <v-collapse-group :onlyOneActive="false" class="notes">
-        <v-collapse-wrapper v-for="(item, index) in items" :key="item.id">
-          <VueDragResize
+        <v-collapse-wrapper v-for="(item, index) in items" v-on:afterToggle="onCollapse(item)" :key="item.id" :active="item.collapsed">
+          <vue-draggable-resizable
             :isActive="true"
             :w="300" :h="20"
             :x="item.left"
             :y="item.top"
-            v-on:dragging="resize($event, item)"
+            @dragging="onDrag(...arguments, item)"
             :isResizable="false"
             drag-handle=".drag-handle"
             :disableUserSelect="false"
@@ -25,11 +25,11 @@
                 <i class="fas fa-toggle-on"></i>
               </div>
               <v-btn class="close-btn" v-on:click="deleteItem(index)"><i class="fas fa-times"></i></v-btn>
-              <div class="my-content" v-collapse-content>
+              <div class="my-content" v-collapse-content :active="false">
                 <note :content="item.content"  @notecontent="onNoteUpdate($event, item, index)"></note>
               </div>
             </div>
-          </VueDragResize>
+          </vue-draggable-resizable>
         </v-collapse-wrapper>
       </v-collapse-group>
     </div>
@@ -42,11 +42,10 @@ import Note from '@/components/Note.vue'
 import VueCollapse from 'vue2-collapse'
 import UUID from 'vue-uuid'
 import editor from 'vue2-medium-editor'
-import VueDragResize from 'vue-drag-resize'
+import VueDraggableResizable from 'vue-draggable-resizable'
 
 Vue.use(VueCollapse)
 Vue.use(UUID)
-Vue.component('vue-drag-resize', VueDragResize)
 
 export default {
   components: {
@@ -54,7 +53,7 @@ export default {
     // eslint-disable-next-line
     VueCollapse,
     'medium-editor': editor,
-    VueDragResize,
+    VueDraggableResizable,
   },
   methods: {
     addNote () {
@@ -62,13 +61,17 @@ export default {
         title: 'New',
         content: '<p>this is Content</p>',
         id: this.$uuid.v1(),
-        color: Math.floor(Math.random() * 3) + 1,
+        color: Math.floor(Math.random() * 4) + 1,
         width: 300,
         height: 300,
         top: 20,
         left: 20,
+        collapsed: false,
       }
       this.items.push(blankNote)
+    },
+    onCollapse (item) {
+      item.collapsed = !item.collapsed
     },
     onNoteUpdate (noteContent, item, index) {
       const itemObject = {
@@ -78,19 +81,20 @@ export default {
         color: item.color,
         top: item.top,
         left: item.left,
+        collapsed: item.collapsed,
       }
       Vue.set(this.items, index, itemObject)
     },
-    resize (newRect, item) {
-      item.top = this.top = newRect.top
-      item.left = this.left = newRect.left
+    onDrag (x, y, item) {
+      // set x/y of dragged item
+      item.left = this.x = x
+      item.top = this.y = y
     },
     deleteItem (index) {
       this.items.splice(index, 1)
     },
     changeColor (item) {
-      item.color = item.color === 3 ? 1 : item.color + 1
-      console.log(item.color)
+      item.color = item.color === 4 ? 1 : item.color + 1
     },
     processEditOperation: function (operation, item) {
       this.text = operation.api.origElements.innerHTML
@@ -100,19 +104,18 @@ export default {
   watch: {
     items: {
       handler () {
-        console.log('items changed!')
         localStorage.setItem('noteItems', JSON.stringify(this.items))
       },
       deep: true,
     },
   },
   mounted () {
-    console.log('App mounted!')
     if (localStorage.getItem('noteItems')) this.items = JSON.parse(localStorage.getItem('noteItems'))
   },
   data: function () {
     return {
       items: [],
+      activeItem: '',
     }
   },
 }
@@ -178,11 +181,20 @@ export default {
 
   .note.color3 {
     border: 1px solid #c0b107;
-    background: #f6e529; /* Old browsers */
-    background: -moz-linear-gradient(top, #f6e529 0%, #daca14 100%); /* FF3.6-15 */
-    background: -webkit-linear-gradient(top, #f6e529 0%,#daca14 100%); /* Chrome10-25,Safari5.1-6 */
-    background: linear-gradient(to bottom, #f6e529 0%,#daca14 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f6e529', endColorstr='#daca14',GradientType=0 ); /* IE6-9 */
+    background: #fff948; /* Old browsers */
+    background: -moz-linear-gradient(top, #fff948 0%, #daca14 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #fff948 0%,#daca14 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #fff948 0%,#daca14 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fff948', endColorstr='#daca14',GradientType=0 ); /* IE6-9 */
+  }
+
+  .note.color4 {
+    border: 1px solid #939393;
+    background: #d3d3d3; /* Old browsers */
+    background: -moz-linear-gradient(top, #d3d3d3 0%, #939393 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #d3d3d3 0%,#939393 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #d3d3d3 0%,#939393 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d3d3d3', endColorstr='#939393',GradientType=0 ); /* IE6-9 */
   }
 
   .medium-editor-toolbar {display: none;}
