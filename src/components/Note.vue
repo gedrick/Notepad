@@ -45,18 +45,10 @@
 
         <button
           class="menubar__button"
-          :class="{ 'is-active': isActive.paragraph() }"
-          @click="commands.paragraph"
-        >
-          <i class="fas fa-paragraph"></i>
-        </button>
-
-        <button
-          class="menubar__button"
           :class="{ 'is-active': isActive.heading({ level: 1 }) }"
           @click="commands.heading({ level: 1 })"
         >
-          <i class="fas fa-h1"></i>
+          <strong>H1</strong>
         </button>
 
         <button
@@ -64,7 +56,7 @@
           :class="{ 'is-active': isActive.heading({ level: 2 }) }"
           @click="commands.heading({ level: 2 })"
         >
-          <i class="fas fa-h2"></i>
+          <strong>H2</strong>
         </button>
 
         <button
@@ -72,7 +64,7 @@
           :class="{ 'is-active': isActive.heading({ level: 3 }) }"
           @click="commands.heading({ level: 3 })"
         >
-          <i class="fas fa-h3"></i>
+          <strong>H3</strong>
         </button>
 
         <button

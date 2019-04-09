@@ -9,7 +9,6 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
-    "bulma": "^0.7.4",
     "tiptap": "^1.12.0",
     "tiptap-extensions": "^1.12.1",
     "vue": "^2.6.3",

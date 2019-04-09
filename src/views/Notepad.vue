@@ -59,7 +59,7 @@ export default {
     addNote () {
       const blankNote = {
         title: 'New',
-        content: '<p>this is Content</p>',
+        content: '<p>this is Content</p><p><br></p>',
         id: this.$uuid.v1(),
         color: Math.floor(Math.random() * 4) + 1,
         width: 300,
@@ -253,6 +253,30 @@ export default {
     columns:4;
     column-gap: 1em;
     max-height: calc(100vh - 100px);
+  }
+
+  .note h2:focus,
+  .ProseMirror:focus {
+    outline: none;
+  }
+
+  .note p {
+    margin-bottom: 3px;
+  }
+
+  .note code {
+    padding: 2px 4px;
+    background: #fdf5e3;
+    color: #013039;
+    border-radius: 0;
+    box-shadow: none;
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  .note code:before,
+  .note code:after {
+    display: none;
   }
 
   .notes > * {
