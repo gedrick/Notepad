@@ -1,38 +1,39 @@
 <template>
-  <div class="notepad">
+  <div class="notepad" v-bind:class="bgClass()">
     <v-btn class="add-btn" v-on:click="addNote()"><i class="fas fa-plus"></i></v-btn>
-      <v-collapse-group :onlyOneActive="false" class="notes">
-        <v-collapse-wrapper v-for="(item, index) in items" v-on:afterToggle="onCollapse(item)" :key="item.id">
-          <vue-draggable-resizable
-            :isActive="true"
-            :w="300" :h="20"
-            :x="item.left"
-            :y="item.top"
-            @dragging="onDrag(...arguments, item)"
-            :resizable="false"
-            drag-handle=".drag-handle"
-            :disableUserSelect="false"
-          >
-            <div :class="'note color' + item.color" v-on:click="onActivated(item)">
-              <div class="drag-handle"></div>
-              <div class="title">
-                <medium-editor :options="options" :text='item.title' custom-tag='h2' v-on:edit='processEditOperation($event, item)' />
-              </div>
-              <div v-on:click="changeColor(item)" class="color">
-                <i class="fas fa-fill-drip"></i>
-              </div>
-              <div class="toggle" v-collapse-toggle>
-                <i class="fas fa-toggle-on"></i>
-              </div>
-              <v-btn class="close-btn" v-on:click="deleteItem(index)"><i class="fas fa-times"></i></v-btn>
-              <div class="my-content" v-collapse-content :active="false">
-                <note :content="item.content"  @notecontent="onNoteUpdate($event, item, index)"></note>
-              </div>
+    <v-btn class="add-btn" v-on:click="changeBg()"><i class="fas fa-image"></i></v-btn>
+    <v-collapse-group :onlyOneActive="false" class="notes">
+      <v-collapse-wrapper v-for="(item, index) in items" v-on:afterToggle="onCollapse(item)" :key="item.id">
+        <vue-draggable-resizable
+          :isActive="true"
+          :w="300" :h="20"
+          :x="item.left"
+          :y="item.top"
+          @dragging="onDrag(...arguments, item)"
+          :resizable="false"
+          drag-handle=".drag-handle"
+          :disableUserSelect="false"
+        >
+          <div :class="'note color' + item.color" v-on:click="onActivated(item)">
+            <div class="drag-handle"></div>
+            <div class="title">
+              <medium-editor :options="options" :text='item.title' custom-tag='h2' v-on:edit='processEditOperation($event, item)' />
             </div>
-          </vue-draggable-resizable>
-        </v-collapse-wrapper>
-      </v-collapse-group>
-    </div>
+            <div v-on:click="changeColor(item)" class="color">
+              <i class="fas fa-fill-drip"></i>
+            </div>
+            <div class="toggle" v-collapse-toggle>
+              <i class="fas fa-toggle-on"></i>
+            </div>
+            <v-btn class="close-btn" v-on:click="deleteItem(index)"><i class="fas fa-times"></i></v-btn>
+            <div class="my-content" v-collapse-content :active="false">
+              <note :content="item.content"  @notecontent="onNoteUpdate($event, item, index)"></note>
+            </div>
+          </div>
+        </vue-draggable-resizable>
+      </v-collapse-wrapper>
+    </v-collapse-group>
+  </div>
 </template>
 
 <script>
@@ -57,6 +58,7 @@ export default {
   },
   methods: {
     addNote () {
+      // add new note
       const blankNote = {
         title: 'New',
         content: '<p>this is Content</p><p><br></p>',
@@ -70,15 +72,31 @@ export default {
       }
       this.items.push(blankNote)
     },
+    changeBg () {
+      // change/set background
+      if (this.bgNumber > 2) {
+        this.bgNumber = 1
+      } else {
+        this.bgNumber++
+      }
+      localStorage.setItem('bgNumber', JSON.stringify(this.bgNumber))
+    },
+    bgClass () {
+      // bind bg class
+      return 'bg' + this.bgNumber
+    },
     onActivated (item) {
+      // On selected, push to end of array and bring to top of stack
       if (this.items.length > 1) {
         this.items.push(this.items.splice(this.items.indexOf(item), 1)[0])
       }
     },
     onCollapse (item) {
+      // toggle note collapse state
       item.collapsed = !item.collapsed
     },
     onNoteUpdate (noteContent, item, index) {
+      // update note object
       const itemObject = {
         title: item.title,
         content: noteContent,
@@ -96,17 +114,21 @@ export default {
       item.top = this.y = y
     },
     deleteItem (index) {
+      // delete note
       this.items.splice(index, 1)
     },
     changeColor (item) {
+      // cycle through colors
       item.color = item.color === 5 ? 1 : item.color + 1
     },
     processEditOperation: function (operation, item) {
+      // update title of note
       this.text = operation.api.origElements.innerHTML
       item.title = this.text
     },
   },
   watch: {
+    // watch items array for changes and update local storage
     items: {
       handler () {
         localStorage.setItem('noteItems', JSON.stringify(this.items))
@@ -115,12 +137,14 @@ export default {
     },
   },
   mounted () {
+    // get notes/bg if key exists in local storage
     if (localStorage.getItem('noteItems')) this.items = JSON.parse(localStorage.getItem('noteItems'))
+    if (localStorage.getItem('bgNumber')) this.bgNumber = JSON.parse(localStorage.getItem('bgNumber'))
   },
   data: function () {
     return {
       items: [],
-      activeItem: '',
+      bgNumber: 1,
       options: {
         toolbar: false,
       },
@@ -131,14 +155,13 @@ export default {
 
 <style lang="scss">
 // Variables
-$color1: #00b7ea;
-$color2: #b6f934;
-$color3: #fff948;
+$color1: #4ad2f8;
+$color2: #d0fd75;
+$color3: #fffa6e;
 $color4: #eeeeee;
-$color5: #eb5dfd;
+$color5: #f397ff;
 
 // Mixins
-
 @mixin gradientBackground($color) {
   border: 1px solid darken($color, 10%);
   background: $color; /* Old browsers */
@@ -148,17 +171,23 @@ $color5: #eb5dfd;
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='$color', endColorstr='darken($color, 20%)', GradientType=0 ); /* IE6-9 */
 }
 
-  body, html {
-   background: url('../assets/images/board.png') no-repeat;
-   background-size: cover;
-   height: 100vh;
-   max-height: 100vh;
-   overflow: hidden;
-  }
-
   .notepad {
-    padding: 50px;
+    background-size: cover;
+    height: 100vh;
     max-height: 100vh;
+    overflow: hidden;
+    padding: 50px;
+
+    &.bg1 {
+      background-image: url('../assets/images/tiles.jpg');
+    }
+    &.bg2 {
+      background-image: url('../assets/images/board.png');
+    }
+    &.bg3 {
+      background-position: right;
+      background-image: url('../assets/images/cherry.jpg');
+    }
   }
 
   .draggable {
