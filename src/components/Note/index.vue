@@ -119,7 +119,7 @@
   </div>
 </template>
 
-<style>
+<style lang="scss">
   .menubar {
     display: flex;
     padding: 5px 0;
@@ -127,9 +127,10 @@
     border-top: 1px solid black;
     border-bottom: 1px solid black;
     justify-content: space-between;
-  }
-  button {
-    font-size: 8px;
+
+    button {
+      font-size: 8px;
+    }
   }
 </style>
 
