@@ -39,6 +39,7 @@
 <script>
 // Import the editor
 import Vue from 'vue'
+import { mapState, mapMutations } from 'vuex';
 import Note from '@/components/Note/index.vue'
 import VueCollapse from 'vue2-collapse'
 import UUID from 'vue-uuid'
@@ -47,6 +48,7 @@ import VueDraggableResizable from 'vue-draggable-resizable'
 
 Vue.use(VueCollapse)
 Vue.use(UUID)
+// This might be better to do this in main.js to keep it clean
 
 export default {
   components: {
@@ -56,9 +58,22 @@ export default {
     'medium-editor': editor,
     VueDraggableResizable,
   },
+  computed: {
+    ...mapState(['notes', 'background'])
+    // these mapped states are reactive, meaning that if state.notes changes (from your
+    // mutation, that is) - that change will immediately be reflected in here.
+    // So if you have a v-for="(note in notes)", and you call addNote() (a mapped mutation)
+    // it will create a new Note in state.notes, and will be reflected in this component.
+  },
   methods: {
+    ...mapMutations(['addNote', 'deleteNote', 'setBackground']),
+    // these mapped mutations can be called directly - they can replace the methods
+    // in here. ex. `this.setBackground(2)`
+    // think of this as
     addNote () {
       // add new note
+      // move this logic into the mutation addNote, then you can delete this whole function
+      // and just reference your mutation addNote!
       const blankNote = {
         title: 'New',
         content: '<p>this is Content</p><p><br></p>',
