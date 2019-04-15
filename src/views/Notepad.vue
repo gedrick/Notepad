@@ -1,7 +1,7 @@
 <template>
-  <div class="notepad" v-bind:class="bgClass()">
-    <v-btn class="add-btn" v-on:click="addNote()"><i class="fas fa-plus"></i></v-btn>
-    <v-btn class="add-btn" v-on:click="changeBg()"><i class="fas fa-image"></i></v-btn>
+  <div class="notepad" :class="bgClass()">
+    <v-btn class="add-btn" @click="addNote()"><i class="fas fa-plus"></i></v-btn>
+    <v-btn class="add-btn" @click="changeBg()"><i class="fas fa-image"></i></v-btn>
     <v-collapse-group :onlyOneActive="false" class="notes">
       <v-collapse-wrapper v-for="(item, index) in items" v-on:afterToggle="onCollapse(item)" :key="item.id">
         <vue-draggable-resizable
@@ -14,18 +14,18 @@
           drag-handle=".drag-handle"
           :disableUserSelect="false"
         >
-          <div :class="'note color' + item.color" v-on:click="onActivated(item)">
+          <div :class="'note color' + item.color" @click="onActivated(item)">
             <div class="drag-handle"></div>
             <div class="title">
               <medium-editor :options="options" :text='item.title' custom-tag='h2' v-on:edit='processEditOperation($event, item)' />
             </div>
-            <div v-on:click="changeColor(item)" class="color">
+            <div @click="changeColor(item)" class="color">
               <i class="fas fa-fill-drip"></i>
             </div>
             <div class="toggle" v-collapse-toggle>
               <i class="fas fa-toggle-on"></i>
             </div>
-            <v-btn class="close-btn" v-on:click="deleteItem(index)"><i class="fas fa-times"></i></v-btn>
+            <v-btn class="close-btn" @click="deleteItem(index)"><i class="fas fa-times"></i></v-btn>
             <div class="my-content" v-collapse-content :active="false">
               <note :content="item.content"  @notecontent="onNoteUpdate($event, item, index)"></note>
             </div>
@@ -229,7 +229,26 @@ $color5: #f397ff;
         @include gradientBackground($color5);
       }
 
-      &:after,
+      &:after {
+        content: '';
+        z-index: -1;
+        position: absolute;
+        right: 10px;
+        bottom: 10px;
+        width: 70%;
+        max-width: 300px; /* avoid rotation causing ugly appearance at large container widths */
+        max-height: 100px;
+        height: 55%;
+        -webkit-box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+        -moz-box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+        -webkit-transform: skew(15deg) rotate(6deg);
+        -moz-transform: skew(15deg) rotate(6deg);
+        -ms-transform: skew(15deg) rotate(6deg);
+        -o-transform: skew(15deg) rotate(6deg);
+        transform: skew(15deg) rotate(6deg);
+      }
+
       &:before {
         content: '';
         z-index: -1;
@@ -311,7 +330,6 @@ $color5: #f397ff;
         border-radius: 0;
         box-shadow: none;
         display: block;
-        margin-bottom: 3px;
 
         &:before,
         &:after {
